@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Main to exeute the solving of the lorenz equations using a 4th order runge kutta scheme
+Main to exeute the solving of the lorenz equations using a 4th order runge kutta scheme 
+and CN
 """
 
 import LorenzAttractor
