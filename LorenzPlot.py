@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Apr 26 10:53:01 2016
-
+Created on Tue Apr 26 10:53:01 
 @author: christiana
 """
 import matplotlib.pyplot as plt
