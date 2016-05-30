@@ -75,8 +75,9 @@ def RungeKutta(lorenzParam,factor,x_o,y_o,z_o,dt):
     
     #Access needed params
     nt = int(lorenzParam['nt']*factor)
-
-    dt = lorenzParam['dt']/factor
+    if type(dt) == float:
+        dt_value = lorenzParam['dt']/factor
+        dt = [dt_value]*nt
 
     
     #nt+1 as we want space to store information from nt timesteps PLUS the initial conditions
@@ -99,24 +100,30 @@ def RungeKutta(lorenzParam,factor,x_o,y_o,z_o,dt):
         #At each timestep we must calculate k(1-4) for x(k),y(l) and z(m) 
         k1,l1,m1 = lorenz_derivatives(x[n],y[n],z[n],lorenzParam)
         
-        k2,l2,m2 = lorenz_derivatives(x[n]+(dt/2.)*k1,y[n]+(dt/2.)*l1,z[n]+(dt/2.)*m1,\
+        k2,l2,m2 = lorenz_derivatives(x[n]+(dt[n]/2.)*k1,y[n]+(dt[n]/2.)*l1,z[n]+(dt[n]/2.)*m1,\
                   lorenzParam)
                 
-        k3,l3,m3 = lorenz_derivatives(x[n]+(dt/2.)*k2, y[n]+(dt/2.)*l2,z[n]+(dt/2.)*m2,\
+        k3,l3,m3 = lorenz_derivatives(x[n]+(dt[n]/2.)*k2, y[n]+(dt[n]/2.)*l2,z[n]+(dt[n]/2.)*m2,\
                   lorenzParam)
                 
-        k4,l4,m4 = lorenz_derivatives(x[n]+dt*k3,y[n]+dt*l3,z[n]+dt*m3,\
+        k4,l4,m4 = lorenz_derivatives(x[n]+dt[n]*k3,y[n]+dt[n]*l3,z[n]+dt[n]*m3,\
                  lorenzParam)
         
         #Update Eqns
-        x[n+1] = x[n] + (dt/6.)*(k1+2*k2+2*k3+k4)
-        y[n+1] = y[n] + (dt/6.)*(l1+2*l2+2*l3+l4)
-        z[n+1] = z[n] + (dt/6.)*(m1+2*m3+2*m3+m4)
+        x[n+1] = x[n] + (dt[n]/6.)*(k1+2*k2+2*k3+k4)
+        y[n+1] = y[n] + (dt[n]/6.)*(l1+2*l2+2*l3+l4)
+        z[n+1] = z[n] + (dt[n]/6.)*(m1+2*m3+2*m3+m4)
         #Calculate the speed to find the distance 
-        v= (k1+2*k2+2*k3+k4)/6.
-        u= (l1+2*l2+2*l3+l4)/6.
+        '''
+        u= (k1+2*k2+2*k3+k4)/6.
+        v= (l1+2*l2+2*l3+l4)/6.
         w= (m1+2*m3+2*m3+m4)/6.
+        '''
+        u = k1
+        v= l1
+        w=m1
+        
         V = np.sqrt(v**2 +u**2 +w**2)
-        r[n+1] = r[n] + V*dt
+        r[n+1] = r[n] + V*dt[n]
         
     return x,y,z,r

@@ -10,14 +10,14 @@ import numpy as np
 
 
 
-def errorPlot(diff, lorenzParam,name):
+def errorPlot(diff, lorenzParam,name,dttype):
     dt = lorenzParam['dt']
     nt = lorenzParam['nt']
     duration = dt*nt
     t = np.linspace(0,duration,nt)
     plt.plot(t,diff, 'k')
     plt.xlabel('duration, t')
-    plt.ylabel('difference between abs(R_'+str(name)+') and abs(r_RK)')
+    plt.ylabel('distance travelled error:RK_'+str(name)+' and RK'+str(dttype))
     plt.show()
     
 
