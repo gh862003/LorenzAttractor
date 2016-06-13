@@ -14,11 +14,26 @@ def errorPlot(diff, lorenzParam,name,dttype):
     dt = lorenzParam['dt']
     nt = lorenzParam['nt']
     duration = dt*nt
-    t = np.linspace(0,duration,nt)
+    
+    t = np.linspace(0,duration,len(diff))
     plt.plot(t,diff, 'k')
     plt.xlabel('duration, t')
     plt.ylabel('distance travelled error:RK_'+str(name)+' and RK'+str(dttype))
     plt.show()
+
+def errorCompar(d_const,d_var,lorenzParam,name,t_var):
+    dt = lorenzParam['dt']
+    nt = lorenzParam['nt']
+    duration = dt*nt
+    
+    t = np.linspace(0,duration,len(d_const))
+    plt.plot(t,d_const, 'k')
+    plt.plot(t_var,d_var,'g')
+    plt.xlabel('duration, t')
+    plt.ylabel('distance error wtr RK: '+str(name)+' and '+str(name)+ 'variable')
+    plt.show()
+
+    
     
 
 def lorentzPlotting(x,y,z,lorenzParam):

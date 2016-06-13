@@ -6,6 +6,94 @@ Created on Tue Apr 26 09:53:37 2016
 """
 import numpy as np
 
+
+
+
+def find_nearest_index(vals, targets):
+    """ Searches through vals for the target values, returning the index
+    of the value in vals that is closest numerically to the target value.
+    If more than one value in vals is equally close to the target, the index
+    of the first value will be returned.
+    
+    In this context vals with be the high resolution time values and 
+    the targets with be the variable reolution time values. The indicies
+    returned will provide the incidicies of the d_RKh array that can be 
+    comapred to the d array for the variable timestep
+    """
+    indicies =[]
+    start = 0
+    #Loop over all target values
+    for j in range(len(targets)):
+        #re-set indicators
+        min_index = -1
+        min_diff = None
+        # Loop over all the values in the given list
+        for i in range(start,len(vals)):
+            # Find the absolute difference between this value and the target
+            diff = abs(vals[i] - targets[j])
+            # If this is the first time, or if the difference is smaller than
+            # the smallest difference found so far, remember the difference and
+            # the index
+            if min_diff is None or diff < min_diff:
+                min_diff = diff
+                min_index = i
+        indicies.append(min_index)
+        start = min_index
+    return indicies 
+
+
+
+
+def time_match(var_t, highres_t):
+    var_t_indicies =[]
+    highres_t_indicies =[]
+    var_t = np.ndarray.tolist(var_t)
+    #find t instances that occur in both
+    matching_vals= set(var_t).intersection(highres_t)
+    for t in matching_vals:
+        var_t_indicies.append(var_t.index(t))
+        highres_t_indicies.append(highres_t.index(t))
+    return var_t_indicies,highres_t_indicies
+            
+
+
+def Euler(lorenzParam,factor,x_o,y_o,z_o,dt):
+    #Access needed params
+    sigma = lorenzParam['sigma']
+    b = lorenzParam['beta']
+    rho= lorenzParam['sigma']
+    nt = int(lorenzParam['nt']*factor)
+    if type(dt) == float:
+        dt_value = lorenzParam['dt']/factor
+        dt = [dt_value]*nt
+
+    
+    #nt+1 as we want space to store information from nt timesteps PLUS the initial conditions
+    x = np.zeros(nt+1)
+    y = np.zeros(nt+1)
+    z = np.zeros(nt+1)
+    x[0]=x_o
+    y[0]=y_o
+    z[0]=z_o
+    r = np.zeros(nt+1)
+    r[0] =0
+
+    for n in range(0,nt):
+        dx,dy,dz = lorenz_derivatives(x[n],y[n],z[n],lorenzParam)
+        x[n+1] = x[n] + dx*dt[n]
+        y[n+1] = y[n] + dy*dt[n]
+        z[n+1] = z[n] + dz*dt[n]
+            
+        u = dx
+        v = dy
+        w = dz
+        
+        
+        V = np.sqrt(v**2 +u**2 +w**2)
+        r[n+1] = r[n] + V*dt[n]
+    return r
+
+
 def lorenz_derivatives(x,y,z,lorenzParam):
     '''
     takes the x y and z values and params and solves each
@@ -76,7 +164,7 @@ def RungeKutta(lorenzParam,factor,x_o,y_o,z_o,dt):
     #Access needed params
     nt = int(lorenzParam['nt']*factor)
     if type(dt) == float:
-        dt_value = lorenzParam['dt']/factor
+        dt_value = dt/factor
         dt = [dt_value]*nt
 
     
@@ -95,6 +183,7 @@ def RungeKutta(lorenzParam,factor,x_o,y_o,z_o,dt):
 
     
     for n in range(0,nt):
+  
 
     
         #At each timestep we must calculate k(1-4) for x(k),y(l) and z(m) 
@@ -120,10 +209,72 @@ def RungeKutta(lorenzParam,factor,x_o,y_o,z_o,dt):
         w= (m1+2*m3+2*m3+m4)/6.
         '''
         u = k1
-        v= l1
-        w=m1
+        v=  l1
+        w=  m1
+        
         
         V = np.sqrt(v**2 +u**2 +w**2)
         r[n+1] = r[n] + V*dt[n]
         
-    return x,y,z,r
+    return r
+    
+    
+def BackForwads(x_o,y_o,z_o,lorenzParam,factor,dt):
+    '''
+    Backwards forewards Euler-y time stepping, returns only the distance travelled
+    
+    '''
+    nt = int(lorenzParam['nt']*factor)
+    if type(dt) == float:
+        dt_value = lorenzParam['dt']/factor
+        dt = [dt_value]*nt
+
+    
+    #nt+1 as we want space to store information from nt timesteps PLUS the initial conditions
+    x = np.zeros(nt+1)
+    y = np.zeros(nt+1)
+    z = np.zeros(nt+1)
+    x[0]=x_o
+    y[0]=y_o
+    z[0]=z_o
+    r = np.zeros(nt+1)
+    r[0] =0
+    b =lorenzParam['beta']
+    rho = lorenzParam['rho']
+    sigma = lorenzParam['sigma']
+
+
+    for n in range(0,nt):
+        dx=-sigma*(x[n]-y[n])
+
+        x[n+1] = x[n] + dx*dt[n]         
+        u = dx     
+
+        # alternate between calculating y or z first
+
+        if nt%2 == 0:
+            
+            #Update y then z
+            dy = rho*x[n+1] - y[n] - x[n+1]*z[n]
+            y[n+1] = y[n] +dy*dt[n]
+            v = dy
+            dz = x[n+1]*y[n+1] - b*z[n]
+            z[n+1] = z[n] +dz*dt[n]
+            w = dz
+
+        else:
+            #Update z then y
+            dz = x[n+1]*y[n] - b*z[n]
+            z[n+1] = z[n] +dz*dt[n]
+            w = dz
+            dy = rho*x[n+1] - y[n] - x[n+1]*z[n+1]
+            y[n+1] = y[n] +dy*dt[n]
+            v = dy
+                
+        V = np.sqrt(v**2 +u**2 +w**2)
+        r[n+1] = r[n] + V*dt[n]
+                    
+    
+    
+    return r
+    
