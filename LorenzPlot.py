@@ -10,25 +10,25 @@ import numpy as np
 
 
 
-def errorPlot(diff, lorenzParam,name,dttype):
+def errorPlot(diff, lorenzParam,name,dttype,nt):
     dt = lorenzParam['dt']
-    nt = lorenzParam['nt']
+  
     duration = dt*nt
     
     t = np.linspace(0,duration,len(diff))
     plt.plot(t,diff, 'k')
     plt.xlabel('duration, t')
-    plt.ylabel('distance travelled error:RK_'+str(name)+' and RK'+str(dttype))
+    plt.ylabel('distance travelled error:'+str(name)+' and RK4 High Res')
+    plt.savefig('LongRunPlot_' + str(name) + '.pdf')
     plt.show()
+    
 
-def errorCompar(d_const,d_var,lorenzParam,name,t_var):
-    dt = lorenzParam['dt']
-    nt = lorenzParam['nt']
+def errorCompar(d_const,d_var,dt,nt,name,t_var):
     duration = dt*nt
     
     t = np.linspace(0,duration,len(d_const))
     plt.plot(t,d_const, 'k')
-    plt.plot(t_var,d_var,'g')
+    plt.plot(t_var,d_var,'firebrick')
     plt.xlabel('duration, t')
     plt.ylabel('distance error wtr RK: '+str(name)+' and '+str(name)+ 'variable')
     plt.show()
@@ -36,11 +36,10 @@ def errorCompar(d_const,d_var,lorenzParam,name,t_var):
     
     
 
-def lorentzPlotting(x,y,z,lorenzParam):
+def lorentzPlotting(x,y,z,lorenzParam,nt):
     sigma = lorenzParam['sigma']
     rho = lorenzParam['rho']
     beta = lorenzParam['beta']
-    nt = lorenzParam['nt']
     dt = lorenzParam['dt']
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')

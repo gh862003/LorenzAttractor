@@ -27,7 +27,8 @@ def find_nearest_index(vals, targets):
         #re-set indicators
         min_index = -1
         min_diff = None
-        # Loop over all the values in the given list
+        # Loop over all the values in the given list from the last index
+        #can do this since we know these time arrays will be sequential
         for i in range(start,len(vals)):
             # Find the absolute difference between this value and the target
             diff = abs(vals[i] - targets[j])
@@ -59,12 +60,9 @@ def time_match(var_t, highres_t):
 
 def Euler(lorenzParam,factor,x_o,y_o,z_o,dt):
     #Access needed params
-    sigma = lorenzParam['sigma']
-    b = lorenzParam['beta']
-    rho= lorenzParam['sigma']
-    nt = int(lorenzParam['nt']*factor)
+    nt = int(lorenzParam['nt_Eu']*factor)
     if type(dt) == float:
-        dt_value = lorenzParam['dt']/factor
+        dt_value = dt/factor
         dt = [dt_value]*nt
 
     
@@ -76,7 +74,7 @@ def Euler(lorenzParam,factor,x_o,y_o,z_o,dt):
     y[0]=y_o
     z[0]=z_o
     r = np.zeros(nt+1)
-    r[0] =0
+    r[0] =np.sqrt(x_o**2 +y_o**2+z_o**2)
 
     for n in range(0,nt):
         dx,dy,dz = lorenz_derivatives(x[n],y[n],z[n],lorenzParam)
@@ -90,8 +88,9 @@ def Euler(lorenzParam,factor,x_o,y_o,z_o,dt):
         
         
         V = np.sqrt(v**2 +u**2 +w**2)
-        r[n+1] = r[n] + V*dt[n]
-    return r
+        #r[n+1] = r[n] + V*dt[n]
+        r[n+1] = np.sqrt(x[n+1]**2+y[n+1]**2+z[n+1]**2)
+    return x,y,z,r
 
 
 def lorenz_derivatives(x,y,z,lorenzParam):
@@ -134,7 +133,7 @@ def CN(lorenzParam):
     y = np.zeros(nt+1)
     z = np.zeros(nt+1)
     x[0]=x_o
-    y[0]=y_o
+    y[0]=y_oC
     z[0]=z_o
     
     for n in range(0,nt):
@@ -162,7 +161,7 @@ def RungeKutta(lorenzParam,factor,x_o,y_o,z_o,dt):
     '''
     
     #Access needed params
-    nt = int(lorenzParam['nt']*factor)
+    nt = int(lorenzParam['nt_RK']*factor)
     if type(dt) == float:
         dt_value = dt/factor
         dt = [dt_value]*nt
@@ -178,7 +177,7 @@ def RungeKutta(lorenzParam,factor,x_o,y_o,z_o,dt):
     r = np.zeros(nt+1)
     v = np.zeros(nt+1)
     w = np.zeros(nt+1)
-    r[0] =0
+    r[0] =np.sqrt(x_o**2 +y_o**2+z_o**2)
     v[0] =0
 
     
@@ -203,30 +202,28 @@ def RungeKutta(lorenzParam,factor,x_o,y_o,z_o,dt):
         y[n+1] = y[n] + (dt[n]/6.)*(l1+2*l2+2*l3+l4)
         z[n+1] = z[n] + (dt[n]/6.)*(m1+2*m3+2*m3+m4)
         #Calculate the speed to find the distance 
-        '''
+        
         u= (k1+2*k2+2*k3+k4)/6.
         v= (l1+2*l2+2*l3+l4)/6.
         w= (m1+2*m3+2*m3+m4)/6.
-        '''
-        u = k1
-        v=  l1
-        w=  m1
+ 
         
         
         V = np.sqrt(v**2 +u**2 +w**2)
-        r[n+1] = r[n] + V*dt[n]
+        #r[n+1] = r[n] + V*dt[n]
+        r[n+1] = np.sqrt(x[n+1]**2+y[n+1]**2+z[n+1]**2)
         
-    return r
+    return x,y,z,r
     
     
-def BackForwads(x_o,y_o,z_o,lorenzParam,factor,dt):
+def ForwardBack(x_o,y_o,z_o,lorenzParam,factor,dt):
     '''
     Backwards forewards Euler-y time stepping, returns only the distance travelled
     
     '''
-    nt = int(lorenzParam['nt']*factor)
+    nt = int(lorenzParam['nt_FB']*factor)
     if type(dt) == float:
-        dt_value = lorenzParam['dt']/factor
+        dt_value = dt/factor
         dt = [dt_value]*nt
 
     
@@ -238,13 +235,13 @@ def BackForwads(x_o,y_o,z_o,lorenzParam,factor,dt):
     y[0]=y_o
     z[0]=z_o
     r = np.zeros(nt+1)
-    r[0] =0
+    r[0] =np.sqrt(x_o**2 +y_o**2+z_o**2)
     b =lorenzParam['beta']
     rho = lorenzParam['rho']
     sigma = lorenzParam['sigma']
 
 
-    for n in range(0,nt):
+    for n in range(nt):
         dx=-sigma*(x[n]-y[n])
 
         x[n+1] = x[n] + dx*dt[n]         
@@ -272,9 +269,10 @@ def BackForwads(x_o,y_o,z_o,lorenzParam,factor,dt):
             v = dy
                 
         V = np.sqrt(v**2 +u**2 +w**2)
-        r[n+1] = r[n] + V*dt[n]
+        #r[n+1] = r[n] + V*dt[n]
+        r[n+1] = np.sqrt(x[n+1]**2+y[n+1]**2+z[n+1]**2)
                     
     
     
-    return r
+    return x,y,z,r
     

@@ -31,63 +31,55 @@ def orderOfAccuracy():
 
    
 
-   dt_range = [0.0001,0.0003,0.0005,0.001,0.003,0.005]
-   d_err_dts = []*len(dt_range)
-   l2_dts = []*len(dt_range)
-   d_av_err = [0]*len(dt_range)
+   dt_range = [0.00075,0.0015,0.003]
+   d_err_dts = [[],[],[]]
+
    
    #loop over the number of initial conditions to use
 
        
-  # for i in range(0,1):
+   for i in range(0,10):
    
-   #create random intial conditions between -15 and 15
-   x_o = -15 + 30 * np.random.random()
-   y_o = -15 + 30 * np.random.random()
-   z_o = -15 + 30 * np.random.random()
-   '''
-   x_o =ICs[i]
-   y_o =ICs[(i+3)%len(ICs)]
-   z_o =ICs[(2*i)%len(ICs)]
-   '''
-   
-   
-   for dt in dt_range:
-       lorenzParam['nt'] = int(0.5/dt)
-       nt = lorenzParam['nt']
-       print dt
-       #Get values
-       d= LorenzAttractor.Euler(lorenzParam,1.,x_o,y_o,z_o,dt)
-       d_r = LorenzAttractor.RungeKutta(lorenzParam,1,x_o,y_o,z_o,dt)
- 
-       d_RKh = LorenzAttractor.RungeKutta(lorenzParam,RK_factor,x_o,y_o,z_o,dt)
-
-       #Cut the higher res run so it is comparable to the lower
-       RK_mark = int(RK_factor)
-       d_RKA =  d_RKh[1::RK_mark]
-       d_RKA = np.array([0.0] + np.ndarray.tolist(d_RKA))
-
-       # calculate the error a
-       dError = abs(d_RKA[-1] -d[-1])
-       d_RKA = np.array(d_RKA)
-       l2 = np.sqrt((dError**2)/(d_RKA[-1]**2))
-       l2_dts.append(l2)
-       d_err_dts.append(dError)
-       t = [dt]*nt
-       time = np.cumsum(t)
+       #create random intial conditions between -15 and 15
+       x_o = -15 + 30 * np.random.random()
+       y_o = -15 + 30 * np.random.random()
+       z_o = -15 + 30 * np.random.random()
+       '''
+       x_o =ICs[i]
+       y_o =ICs[(i+3)%len(ICs)]
+       z_o =ICs[(2*i)%len(ICs)]
+       '''
        
-       plt.plot(time,abs(d_RKA[1:] -d[1:]),'r')
-       plt.plot(time,(d_RKA[1:]-d_r[1:]),'k')
-
+       
+       for index,dt in enumerate(dt_range):
            
-   '''       
-   print d_err_dts[0][0]
-   for x in range(len(dt_range)): 
-       d_av_err[x] = [np.average(d_err_dts[x][a]) for a in range(len(d_err_dts[x]))]
-   l2_av_err = [np.average(l2_dts[a]) for a in range(len(l2_dts))]
-   '''
-   #plt.loglog(dt_range,d_err_dts, linestyle = '--', marker ='x', color = 'g')
-   #plt.loglog(dt_range,l2_dts, linestyle = '--', marker ='x', color = 'g')
+           lorenzParam['nt_RK'] = int(round(7./dt))
+           lorenzParam['nt_Eu'] = int(round(7./dt))
+           nt = lorenzParam['nt_RK']
+           
+           print dt
+           #Get values
+           x_Eu,y_Eu,z_Eu,d_Eu= LorenzAttractor.RungeKutta(lorenzParam,1.,x_o,y_o,z_o,dt)
+           x_r,y_r,z_r,d_r = LorenzAttractor.RungeKutta(lorenzParam,1.,x_o,y_o,z_o,dt)
+     
+           x_hr,y_hr,z_hr,d_RKh = LorenzAttractor.RungeKutta(lorenzParam,RK_factor,x_o,y_o,z_o,dt)
+           
+           #Cut the higher res run so it is comparable to the lower
+           RK_mark = int(RK_factor)
+           d_RKA =  d_RKh[1::RK_mark]
+           d_RKA = np.array([0.0] + np.ndarray.tolist(d_RKA))
+    
+           # calculate the error a
+           dError = abs(d_RKA[-1] -d_Eu[-1])
+           d_RKA = np.array(d_RKA)
+           d_err_dts[index].append(dError)
+
+   
+
+   d_err_dts = [np.average(d_err_dts[i]) for i in range(len(d_err_dts))]
+
+   plt.loglog(dt_range,d_err_dts, linestyle = '--', marker ='x', color = 'firebrick')
+
    xlog = np.log(dt_range)
    #y1log=np.log(l2_dts)
    y2log = np.log(d_err_dts)

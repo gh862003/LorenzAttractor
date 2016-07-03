@@ -61,7 +61,7 @@ def eigenPlots(lorenzParams):
     depends on the initial conditions
     '''
     B = lorenzParams['beta']
-    dt_range = np.linspace(0.000001,0.05,80)
+    dt_range = np.linspace(0.000001,0.01,80)
     plt.figure(figsize=(5,4))
     #calculate and plot all background values
     e =eigenSolver(lorenzParams,0)
@@ -108,7 +108,7 @@ def eigenPlots(lorenzParams):
     #plt.plot(dt_range,A_E)
     plt.xlabel('dt')
     plt.ylabel('max(|lambda|) dt')
-    plt.axhline(y=1)
+    plt.axhline(y=0.15)
     plt.show()
 
     
