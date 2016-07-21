@@ -153,22 +153,22 @@ def main():
    
        
       
-   
+         
 
    
        #pos_diff_CN = np.sqrt((x_A-x)**2 +(y_A-y)**2 +(z_A-z)**2)
        #pos_diff_RK = np.sqrt((x_RKA-x)**2 +(y_RKA-y)**2 +(z_RKA-z)**2)
        d_diff_RK = abs(d_RKA - np.array(d_RK))
        d_diff_RK = np.cumsum(np.array(d_diff_RK)**2)
-       d_diff_RK = [np.sqrt(r/index) for index,r in enumerate(d_diff_RK)]
+       d_diff_RK = [np.sqrt(r/(index+1)) for index,r in enumerate(d_diff_RK)]
        
        d_diff_eu = abs(d_RKE - np.array(d_eu))
        d_diff_eu = np.cumsum(np.array(d_diff_eu)**2)
-       d_diff_eu = [np.sqrt(r/index) for index,r in enumerate(d_diff_eu)]
+       d_diff_eu = [np.sqrt(r/(index+1)) for index,r in enumerate(d_diff_eu)]
        
        d_diff_BF = abs(d_RKFB - np.array(d_FB))
        d_diff_BF = np.cumsum(np.array(d_diff_BF)**2)
-       d_diff_BF = [np.sqrt(r/index) for index,r in enumerate(d_diff_BF)]
+       d_diff_BF = [np.sqrt(r/(index+1)) for index,r in enumerate(d_diff_BF)]
        
        
        
@@ -176,6 +176,7 @@ def main():
        d_errorRK.append(d_diff_RK)
        d_errorEu.append(d_diff_eu)
        d_errorBF.append(d_diff_BF)
+       
 
        print i
    print 'doing calcs' 
