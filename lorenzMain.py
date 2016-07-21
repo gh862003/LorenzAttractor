@@ -15,6 +15,7 @@ import csv
 
 
 def main():
+    
    #Set up dictionary of input parameters from lorenzParams file
    lorenzParam = {}
    execfile("lorenzParams.py", lorenzParam)
@@ -48,7 +49,7 @@ def main():
 
    
    #Will be the factor to divide the timestep by for higher res
-   RK_factor = 20.
+   RK_factor = 100.
    
    #create the time-array for the high reslution of the same length as each schemes duration
    highres_dtRK = [dt/RK_factor]*int(ntRK*RK_factor)
@@ -205,26 +206,10 @@ def main():
    av_d_errorsRKv = np.mean(np.array(d_errorRKv),axis =0)
    av_d_errorsEuv = np.mean(np.array(d_errorEuv),axis =0)
    av_d_errorsBFv = np.mean(np.array(d_errorBFv),axis =0)
-   '''
-   f = open('IC_selected.txt', 'w')
-   for u in range(len(ICxs)):
-       ICs = str(ICxs[u]) + ',' +str(ICys[u])+ ',' + str(ICzs[u]) +'\n'
-       f.write(ICs)
-   f.close()
    
-   
-   #Exicuteable section to create profilr for ICs
-   
-   
-   f = open('ICs.txt', 'w')
-
-   
-   for v in range(len(xRKh[5000:])):
-        ICs = str( xRKh[5000+v]) + ',' +str(yRKh[5000+v])+ ',' + str(zRKh[5000+v]) +'\n'
-        f.write(ICs)
-   f.close()
-   
-   '''
+   print 'RK' ,varTypeRK, (av_d_errorsRK[-1] - av_d_errorsRKv[-1])
+   print 'Eu' ,varTypeEu, (av_d_errorsEu[-1] - av_d_errorsEuv[-1])
+   print 'FB' ,varTypeBF, (av_d_errorsBF[-1] - av_d_errorsBFv[-1])
    
 
    #error comparison plots
@@ -237,15 +222,16 @@ def main():
    LorenzPlot.errorCompar(av_d_errorsBF,av_d_errorsBFv,\
                            dt,ntFB,'Back_F',dt_variableFB,varTypeBF)
    #singular error plots                        
-   LorenzPlot.errorPlot(av_d_errorsRK, lorenzParam,'RK4','const',ntRK)
-   LorenzPlot.errorPlot(av_d_errorsEu, lorenzParam,'Eu','const',ntEu)
-   LorenzPlot.errorPlot(av_d_errorsBF, lorenzParam,'BF','const',ntFB)
+   #LorenzPlot.errorPlot(av_d_errorsRK, lorenzParam,'RK4','const',ntRK)
+   #LorenzPlot.errorPlot(av_d_errorsEu, lorenzParam,'Eu','const',ntEu)
+   #LorenzPlot.errorPlot(av_d_errorsBF, lorenzParam,'BF','const',ntFB)
    
 
 
 
  
    LorenzPlot.lorentzPlotting(xRKh[1:],yRKh[1:],zRKh[1:],lorenzParam,ntRK*RK_factor)
+
 
 
    

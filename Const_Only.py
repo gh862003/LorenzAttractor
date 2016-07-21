@@ -18,6 +18,7 @@ import LorenzAttractor
 import LorenzPlot
 import numpy as np
 import csv
+from mpl_toolkits.mplot3d import Axes3D
 
 
 def main():
@@ -43,7 +44,7 @@ def main():
 
    
    #Will be the factor to divide the timestep by for higher res
-   RK_factor = 20.
+   RK_factor = 100.
    highres_dtRK = [dt/RK_factor]*int(ntRK*RK_factor)
    highres_dtEu = [dt/RK_factor]*int(ntEu*RK_factor)
    highres_dtFB = [dt/RK_factor]*int(ntFB*RK_factor) 
@@ -157,15 +158,15 @@ def main():
    
        #pos_diff_CN = np.sqrt((x_A-x)**2 +(y_A-y)**2 +(z_A-z)**2)
        #pos_diff_RK = np.sqrt((x_RKA-x)**2 +(y_RKA-y)**2 +(z_RKA-z)**2)
-       d_diff_RK = abs(d_RKA - d_RK)
+       d_diff_RK = abs(d_RKA - np.array(d_RK))
        d_diff_RK = np.cumsum(np.array(d_diff_RK)**2)
        d_diff_RK = [np.sqrt(r/index) for index,r in enumerate(d_diff_RK)]
        
-       d_diff_eu = abs(d_RKE - d_eu)
+       d_diff_eu = abs(d_RKE - np.array(d_eu))
        d_diff_eu = np.cumsum(np.array(d_diff_eu)**2)
        d_diff_eu = [np.sqrt(r/index) for index,r in enumerate(d_diff_eu)]
        
-       d_diff_BF = abs(d_RKFB - d_FB)
+       d_diff_BF = abs(d_RKFB - np.array(d_FB))
        d_diff_BF = np.cumsum(np.array(d_diff_BF)**2)
        d_diff_BF = [np.sqrt(r/index) for index,r in enumerate(d_diff_BF)]
        
@@ -192,13 +193,49 @@ def main():
    '''
    
    #LorenzPlot.ICplot(ICxs,ICys,ICzs,lorenzParam,Xs,Ys,Zs)
+   
+   
+   for d in d_errorRK:
+       plt.plot(RKtime, d[1:], c='lightsteelblue')
+       
+   plt.plot(RKtime, av_d_errorsRK[1:],c='k')
+   plt.xlabel('duration, t')
+   plt.ylabel('RMS error in position: RK4 wrt RK4')
+   plt.axvline(x = 8, ls = '--',color = 'b')
+   plt.axvline(x = 13, ls = '--', color = 'b')
+   plt.savefig('Spaghetti_plot_longRunRK4.pdf')
+   plt.show()
+   
+   
+   for d in d_errorEu:
+       plt.plot(Eutime, d[1:], c='lightsteelblue')
+   plt.plot(Eutime, av_d_errorsEu[1:],c='k')
+   plt.xlabel('duration, t')
+   plt.ylabel('RMS error in position: Euler wrt RK4')
+   plt.axvline(x = 0.5, ls = '--',color = 'b')
+   plt.axvline(x = 0.9, ls = '--', color = 'b')
+   plt.savefig('Spaghetti_plot_longRunEu.pdf')
+   plt.show()
+   
+   
+   for d in d_errorBF:
+       plt.plot(FBtime, d[1:],c='lightsteelblue')
+       
+       
+   plt.plot(FBtime, av_d_errorsBF[1:], c='k') 
+   plt.xlabel('duration, t')
+   plt.ylabel('RMS error in position: FB wrt RK4') 
+   plt.axvline(x = 1.2, ls = '--',color = 'b')
+   plt.axvline(x = 2.8, ls = '--', color = 'b')
+   plt.savefig('Spaghetti_plot_longRunFB.pdf')
+   plt.show()
 
-   LorenzPlot.errorPlot(av_d_errorsRK, lorenzParam,'RK','Const',ntRK)
-   LorenzPlot.errorPlot(av_d_errorsEu, lorenzParam,'Eu','Const',ntEu)
-   LorenzPlot.errorPlot(av_d_errorsBF, lorenzParam,'BF','Const',ntFB)
+   LorenzPlot.errorPlot(av_d_errorsRK, lorenzParam,'RK','Const',ntRK,8.5,13)
+   LorenzPlot.errorPlot(av_d_errorsEu, lorenzParam,'Eu','Const',ntEu,0.6,1)
+   LorenzPlot.errorPlot(av_d_errorsBF, lorenzParam,'BF','Const',ntFB,0.6,2.8)
    
  
-   LorenzPlot.lorentzPlotting(xRK[1:],yRK[1:],zRK[1:],lorenzParam,ntRK)
+   LorenzPlot.lorentzPlotting(xRKh[1:],yRKh[1:],zRKh[1:],lorenzParam,ntRK)
 
 
    

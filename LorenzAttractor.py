@@ -279,7 +279,7 @@ def ForwardBack(x_o,y_o,z_o,lorenzParam,factor,dt):
             #v = dy
             dz = x[n+1]*y[n+1] - b*z[n]
             z[n+1] = z[n] +dz*dt[n]
-            #w = dz
+            
 
         else:
             #Update z then y

@@ -71,7 +71,7 @@ def Main_Plots(lorenzParams,dt_range,scheme):
    
 
     
-    plt.xlabel('dt')
+    plt.xlabel('$\Delta t$')
     
     
     

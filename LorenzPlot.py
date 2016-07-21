@@ -10,22 +10,34 @@ import numpy as np
 
 
 
-def errorPlot(diff, lorenzParam,name,dttype,nt):
+def errorPlot(diff, lorenzParam,name,dttype,nt,xLower,xUpper):
     '''
     Plots the error for 1 (constant time-step) case
     '''
     dt = lorenzParam['dt']
   
     duration = dt*nt
-    diff = [np.log(x) for x in diff]
+    difflog = [np.log(x) for x in diff]
     t = np.linspace(0,duration,len(diff))
-
-    plt.plot(t,diff, 'k')
-    plt.xlabel('duration, t')
-    plt.ylabel('distance travelled error:'+str(name)+' and RK4 High Res')
+    fig, ax1 = plt.subplots()
+    ax1.plot(t,diff, 'k')
+    ax1.set_xlabel('duration, t')
+    ax1.set_ylabel('RMS error in position:'+str(name)+' and RK4 High Res')
+    
+    ax2 = ax1.twinx()
+    ax2.plot(t,difflog, c='b')
+    ax2.set_ylabel('log of RMS error in position:'+str(name)+' and RK4 High Res', color='k')
+    for tl in ax2.get_yticklabels():
+        tl.set_color('b')
+        
+    plt.axvline(x = xLower, ls = '--',color = 'lightslategrey')
+    plt.axvline(x = xUpper, ls = '--', color = 'lightslategrey')
     plt.savefig('LongRunPlot_' + str(name) + '.pdf')
     plt.show()
     
+
+
+
 
 def errorCompar(d_const,d_var,dt,nt,name,dt_var,var_type):
     '''
@@ -38,43 +50,46 @@ def errorCompar(d_const,d_var,dt,nt,name,dt_var,var_type):
     #const case time axis
     t = np.linspace(0,duration,len(d_const))
     t_var = np.cumsum(dt_var)
-    fig = plt.figure()
-    ax1 = fig.add_subplot(111)
-    ax2 = ax1.twiny()
-    ax1.plot(t,d_const, 'k')
-    ax1.plot(t_var,d_var,'firebrick')
-    ax1.set_xlabel('duration, t')
-    ax1.set_ylabel('distance error wtr RK: '+str(name)+' and '+str(name)+ 'variable')
-    
-    
-    #second x axis that shows the size of the timestep
-    second_x = np.array(dt_var)
-    x_tick_labels = ["%.3f" % z for z in dt_var]
-    ax2.set_xlim(ax1.get_xlim())
-    ax2.set_xticks(t_var)
-    ax2.set_xticklabels(x_tick_labels)
-    plt.savefig('ComparisionPlot_'+str(name)+'variable_'+str(var_type)+'.pdf')
-    plt.show()
+
+    plt.plot(t,d_const, 'k')
+    plt.plot(t_var,d_var,'b')
+    plt.xlabel('duration, t')
+    plt.ylabel('RMS error in position wtr RK: '+str(name)+' and '+str(name)+ 'variable')
 
     
+    plt.savefig('ComparisionPlot_'+str(name)+'variable_'+str(var_type)+'.pdf')
+    plt.show()
     
+    
+    
+    
+    
+
 
 def lorentzPlotting(x,y,z,lorenzParam,nt):
     '''
     Plots the solution of the lorenz equations
     '''
+
     sigma = lorenzParam['sigma']
     rho = lorenzParam['rho']
     beta = lorenzParam['beta']
     dt = lorenzParam['dt']
+    nt = len(x)
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.plot(x,y,z)
+    plt.gca().patch.set_facecolor('white')
+    
+    ax.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+    ax.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+    ax.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.set_zlabel('z')
-    fig.savefig('Attractor.pdf')
+    fig.savefig('Attractor_' + str(nt) + 'timesteps.pdf')
     fig.show()
+    
     
 def ICplot(x,y,z,lorenzParam,xs,ys,zs):
     '''
